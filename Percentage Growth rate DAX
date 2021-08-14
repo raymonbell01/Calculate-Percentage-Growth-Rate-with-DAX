@@ -1,0 +1,39 @@
+Net Amount - Growth Rate MoM% =
+VAR _PREV_MONTH =
+    CALCULATE (
+        [Net Amount],
+        DATEADD ( 'Calendar Table'[Date], -1, MONTH )
+    )
+
+VAR _CURR_MONTH =
+    CALCULATE ( [Net Amount] )
+
+VAR _RESULT =
+    IF (
+        AND ( AND ( _CURR_MONTH < 0, _PREV_MONTH < 0 ), _CURR_MONTH < _PREV_MONTH ),
+        ( ( _CURR_MONTH - _PREV_MONTH ) / _PREV_MONTH ) * -1,
+        IF (
+            AND ( AND ( _CURR_MONTH < 0, _PREV_MONTH < 0 ), _CURR_MONTH > _PREV_MONTH ),
+            ( ( _CURR_MONTH - _PREV_MONTH ) / _PREV_MONTH ),
+            IF (
+                AND ( _CURR_MONTH < 0, _PREV_MONTH < 0 ),
+                ( ( _CURR_MONTH - _PREV_MONTH ) / _PREV_MONTH ) * -1,
+                IF (
+                    AND ( _CURR_MONTH > 0, _PREV_MONTH < 0 ),
+                    ( ( _CURR_MONTH - _PREV_MONTH ) / _PREV_MONTH ) * -1,
+                    IF (
+                        _PREV_MONTH < _CURR_MONTH,
+                        ( ( _CURR_MONTH - _PREV_MONTH ) / _PREV_MONTH ),
+                        IF (
+                            _PREV_MONTH > _CURR_MONTH,
+                            ( ( _CURR_MONTH - _PREV_MONTH ) / _PREV_MONTH ),
+                            ABS ( ( ( _CURR_MONTH - _PREV_MONTH ) / _PREV_MONTH ) )
+                        )
+                    )
+                )
+            )
+        )
+    )
+
+RETURN
+    _RESULT
